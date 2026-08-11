@@ -30,12 +30,6 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
 
-        <!-- WebApiResp 使用金蝶 SDK 提供的 RepoRet。 -->
-        <dependency>
-            <groupId>com.kingdee</groupId>
-            <artifactId>k3cloud-webapi-sdk-jdk11</artifactId>
-        </dependency>
-
         <!-- Lombok 仅参与编译，不向使用方传递。 -->
         <dependency>
             <groupId>org.projectlombok</groupId>

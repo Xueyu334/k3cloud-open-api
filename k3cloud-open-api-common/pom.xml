@@ -21,12 +21,6 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!-- WebApiHelper 与 CfgUtilExt 使用金蝶 SDK 类型。 -->
-        <dependency>
-            <groupId>com.kingdee</groupId>
-            <artifactId>k3cloud-webapi-sdk-jdk11</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>
             <artifactId>fastjson2</artifactId>
