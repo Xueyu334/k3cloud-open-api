@@ -36,13 +36,6 @@
             <artifactId>k3cloud-webapi-sdk-jdk11</artifactId>
         </dependency>
 
-        <!-- 兼容迁入源码中的 javax.annotation.Nonnull。 -->
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <version>3.0.2</version>
-        </dependency>
-
         <!-- Lombok 仅参与编译，不向使用方传递。 -->
         <dependency>
             <groupId>org.projectlombok</groupId>

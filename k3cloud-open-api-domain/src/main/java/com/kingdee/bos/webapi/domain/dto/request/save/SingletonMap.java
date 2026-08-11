@@ -1,6 +1,5 @@
 package com.kingdee.bos.webapi.domain.dto.request.save;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -110,7 +109,6 @@ public class SingletonMap extends AbstractMap<String, String> {
     }
 
     @Override
-    @Nonnull
     public Set<String> keySet() {
         if (keySet == null) {
             keySet = Collections.singleton(k);
@@ -119,7 +117,6 @@ public class SingletonMap extends AbstractMap<String, String> {
     }
 
     @Override
-    @Nonnull
     public Set<Entry<String, String>> entrySet() {
         if (entrySet == null) {
             entrySet = Collections.singleton(
@@ -129,7 +126,6 @@ public class SingletonMap extends AbstractMap<String, String> {
     }
 
     @Override
-    @Nonnull
     public Collection<String> values() {
         if (values == null) {
             values = Collections.singleton(v);
@@ -175,26 +171,26 @@ public class SingletonMap extends AbstractMap<String, String> {
 
     @Override
     public String computeIfAbsent(String key,
-                                  @Nonnull Function<? super String, ? extends String> mappingFunction) {
+                                  Function<? super String, ? extends String> mappingFunction) {
         throw new UnsupportedOperationException("computeIfAbsent is not supported");
     }
 
     @Override
     public String computeIfPresent(String key,
-                                   @Nonnull BiFunction<? super String, ? super String, ? extends String> remappingFunction) {
+                                   BiFunction<? super String, ? super String, ? extends String> remappingFunction) {
         throw new UnsupportedOperationException("computeIfAbsent is not supported");
     }
 
     @Override
     public String compute(String key,
-                          @Nonnull BiFunction<? super String, ? super String, ? extends String> remappingFunction) {
+                          BiFunction<? super String, ? super String, ? extends String> remappingFunction) {
         throw new UnsupportedOperationException("compute is not supported");
     }
 
     @Override
     public String merge(String key,
-                        @Nonnull String value,
-                        @Nonnull BiFunction<? super String, ? super String, ? extends String> remappingFunction) {
+                        String value,
+                        BiFunction<? super String, ? super String, ? extends String> remappingFunction) {
         throw new UnsupportedOperationException("merge is not supported");
     }
 }
