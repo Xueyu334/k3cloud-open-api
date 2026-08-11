@@ -1,6 +1,7 @@
 package com.kingdee.bos.webapi.domain.dto.request.save;
 
 import com.alibaba.fastjson2.annotation.JSONType;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * 保存/暂存数据时的 Model 标记接口
@@ -41,11 +42,12 @@ import com.alibaba.fastjson2.annotation.JSONType;
  *   <li>非必填字段建议不要出现在 JSON 中,以提高性能</li>
  * </ul>
  *
+ * @author xueyu
  * @see ModelMap 动态配置实现
  * @see SaveRequest#setModel(Model)
- * @author xueyu
  */
 @JSONType(alphabetic = false)
+@JsonPropertyOrder(alphabetic = false)
 public interface Model {
 
 }
