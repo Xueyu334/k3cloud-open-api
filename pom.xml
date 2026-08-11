@@ -6,15 +6,102 @@
     <artifactId>k3cloud-open-api</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
-
+    <modules>
+        <module>k3cloud-open-api-domain</module>
+    </modules>
 
     <properties>
         <java.version>25</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <lombok.version>1.18.46</lombok.version>
+        <spring-boot.version>4.1.0</spring-boot.version>
+        <fastjson2.version>2.0.52</fastjson2.version>
+        <commons-lang3.version>3.20.0</commons-lang3.version>
+        <guava.version>33.2.1-jre</guava.version>
+        <gson.version>2.8.9</gson.version>
+        <caffeine.version>3.1.8</caffeine.version>
+        <eclipse-collections.version>12.0.0.M3</eclipse-collections.version>
+        <httpclient5.version>5.3.1</httpclient5.version>
     </properties>
 
-    <dependencyManagement></dependencyManagement>
+    <dependencyManagement>
+        <dependencies>
+            <!--spring boot dependencies-->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!--fastjson2-->
+            <dependency>
+                <groupId>com.alibaba.fastjson2</groupId>
+                <artifactId>fastjson2</artifactId>
+                <version>${fastjson2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.fastjson2</groupId>
+                <artifactId>fastjson2-extension</artifactId>
+                <version>${fastjson2.version}</version>
+            </dependency>
+
+
+            <!--commons-lang3-->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+
+            <!-- guava 工具包  -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+
+            <!--gson-->
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${gson.version}</version>
+            </dependency>
+
+            <!--caffeine  高性能缓存库-->
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>${caffeine.version}</version>
+            </dependency>
+
+            <!--eclipse-collections-->
+            <dependency>
+                <groupId>org.eclipse.collections</groupId>
+                <artifactId>eclipse-collections</artifactId>
+                <version>${eclipse-collections.version}</version>
+            </dependency>
+
+            <!--httpclient5-->
+            <dependency>
+                <groupId>org.apache.httpcomponents.client5</groupId>
+                <artifactId>httpclient5</artifactId>
+                <version>${httpclient5.version}</version>
+            </dependency>
+
+            <!-- k3cloud-webapi-sdk -->
+            <dependency>
+                <groupId>com.kingdee</groupId>
+                <artifactId>k3cloud-webapi-sdk-jdk11</artifactId>
+                <version>8.2.0</version>
+                <scope>system</scope>
+                <systemPath>${maven.multiModuleProjectDirectory}/lib/k3cloud-webapi-sdk-java11-v8.2.0.jar</systemPath>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -23,7 +110,77 @@
             <version>${lombok.version}</version>
             <scope>compile</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Spring Boot 应用模块声明此插件后，可使用统一版本进行可执行 JAR 重打包。 -->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot.version}</version>
+                    <configuration>
+                        <includeSystemScope>true</includeSystemScope>
+                    </configuration>
+                </plugin>
+
+                <!-- 统一 Java 版本、保留方法参数名，并启用 Lombok 注解处理。 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.13.0</version>
+                    <configuration>
+                        <parameters>true</parameters>
+                        <release>${java.version}</release>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
+                </plugin>
+
+                <!-- 资源文件仅使用 @...@ 占位符，避免误替换 Spring 配置中的 ${...}。 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.3.1</version>
+                    <configuration>
+                        <delimiters>
+                            <delimiter>@</delimiter>
+                        </delimiters>
+                        <useDefaultDelimiters>false</useDefaultDelimiters>
+                    </configuration>
+                </plugin>
+
+                <!-- 子模块按需声明后，在 package 阶段附加对应的源码 JAR。 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.3.1</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
 
 </project>
