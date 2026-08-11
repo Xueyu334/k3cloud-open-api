@@ -4,13 +4,15 @@
 
     <groupId>com.xy</groupId>
     <artifactId>k3cloud-open-api</artifactId>
-    <version>1.0.0</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
     <modules>
         <module>k3cloud-open-api-domain</module>
+        <module>k3cloud-open-api-common</module>
     </modules>
 
     <properties>
+        <revision>1.0.0</revision>
         <java.version>25</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>

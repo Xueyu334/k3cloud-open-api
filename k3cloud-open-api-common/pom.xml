@@ -1,42 +1,53 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>com.xy</groupId>
         <artifactId>k3cloud-open-api</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>k3cloud-open-api-domain</artifactId>
+    <artifactId>k3cloud-open-api-common</artifactId>
     <packaging>jar</packaging>
 
-    <name>k3cloud-open-api-domain</name>
-    <description>K3 Cloud WebAPI 请求与响应领域模型</description>
+    <name>k3cloud-open-api-common</name>
+    <description>K3 Cloud WebAPI 通用转换、调用与配置工具</description>
 
     <dependencies>
-        <!-- 金蝶 WebAPI 请求、响应对象的 JSON 字段映射。 -->
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba.fastjson2</groupId>
-            <artifactId>fastjson2</artifactId>
+            <groupId>com.xy</groupId>
+            <artifactId>k3cloud-open-api-domain</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
-        <!-- 部分请求、响应对象使用 ToStringBuilder。 -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-        </dependency>
-
-        <!-- WebApiResp 使用金蝶 SDK 提供的 RepoRet。 -->
+        <!-- WebApiHelper 与 CfgUtilExt 使用金蝶 SDK 类型。 -->
         <dependency>
             <groupId>com.kingdee</groupId>
             <artifactId>k3cloud-webapi-sdk-jdk11</artifactId>
         </dependency>
 
-        <!-- Lombok 仅参与编译，不向使用方传递。 -->
+        <dependency>
+            <groupId>com.alibaba.fastjson2</groupId>
+            <artifactId>fastjson2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -47,18 +58,14 @@
 
     <build>
         <plugins>
-            <!-- 使用父 POM 统一的 Java 版本与 Lombok 注解处理配置。 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
-
-            <!-- 使用父 POM 的 attach-sources 执行配置生成源码 JAR。 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
-
 </project>
