@@ -98,8 +98,6 @@
                 <groupId>com.kingdee</groupId>
                 <artifactId>k3cloud-webapi-sdk-jdk11</artifactId>
                 <version>8.2.0</version>
-                <scope>system</scope>
-                <systemPath>${maven.multiModuleProjectDirectory}/lib/k3cloud-webapi-sdk-java11-v8.2.0.jar</systemPath>
             </dependency>
 
         </dependencies>
@@ -184,5 +182,18 @@
         </pluginManagement>
     </build>
 
+
+    <repositories>
+        <repository>
+            <id>2488063-release-YmmVR6</id>
+            <url>https://packages.aliyun.com/66c2c0df684fca2ef650a01a/maven/2488063-release-ymmvr6</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
 </project>
