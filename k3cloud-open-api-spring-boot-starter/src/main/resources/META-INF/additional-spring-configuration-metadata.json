@@ -1,0 +1,57 @@
+{
+  "properties": [
+    {
+      "name": "kingdee.k3cloud.web-api.server-url",
+      "description": "金蝶云星空服务地址，应包含协议和 K3Cloud 上下文路径。"
+    },
+    {
+      "name": "kingdee.k3cloud.web-api.acct-id",
+      "description": "第三方应用登录授权的账套 ID。"
+    },
+    {
+      "name": "kingdee.k3cloud.web-api.user-name",
+      "description": "第三方应用登录授权的用户。"
+    },
+    {
+      "name": "kingdee.k3cloud.web-api.app-id",
+      "description": "第三方应用 ID。"
+    },
+    {
+      "name": "kingdee.k3cloud.web-api.app-sec",
+      "description": "第三方应用密钥。"
+    },
+    {
+      "name": "kingdee.k3cloud.web-api.lc-id",
+      "description": "账套语系，2052 表示简体中文。",
+      "defaultValue": 2052
+    },
+    {
+      "name": "kingdee.k3cloud.web-api.org-num",
+      "description": "多组织场景使用的组织编码。"
+    },
+    {
+      "name": "kingdee.k3cloud.web-api.connect-timeout",
+      "description": "连接超时时间，单位为秒。",
+      "defaultValue": 120
+    },
+    {
+      "name": "kingdee.k3cloud.web-api.request-timeout",
+      "description": "请求超时时间，单位为秒。",
+      "defaultValue": 120
+    },
+    {
+      "name": "kingdee.k3cloud.web-api.stock-timeout",
+      "description": "套接字超时时间，单位为秒；stock 是当前 Java 属性的兼容命名。",
+      "defaultValue": 180
+    },
+    {
+      "name": "kingdee.k3cloud.web-api.proxy",
+      "description": "传递给金蝶 SDK 的代理配置，空字符串按未配置处理。"
+    },
+    {
+      "name": "kingdee.k3cloud.web-api.print-execute-url",
+      "description": "是否记录 WebAPI 执行地址。",
+      "defaultValue": false
+    }
+  ]
+}

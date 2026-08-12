@@ -105,28 +105,55 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- 子模块统一继承金蝶 SDK；坐标调整只需修改父 POM。 -->
+        <!-- 子模块编译时统一使用金蝶 SDK，但不向模块使用方传递。 -->
         <dependency>
             <groupId>com.kingdee</groupId>
             <artifactId>k3cloud-webapi-sdk-jdk11</artifactId>
+            <optional>true</optional>
         </dependency>
 
+        <!-- Lombok 仅参与各子模块编译，不向模块使用方传递。 -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <scope>test</scope>
+            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
     </dependencies>
 
     <build>
+        <plugins>
+            <!-- 解析 ${revision} 并安装、发布可被外部项目消费的 POM。 -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.7.3</version>
+                <configuration>
+                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                    <updatePomFile>true</updatePomFile>
+                    <outputDirectory>${project.build.directory}</outputDirectory>
+                    <flattenedPomFilename>flattened-pom.xml</flattenedPomFilename>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten-clean</id>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
         <pluginManagement>
             <plugins>
                 <!-- Spring Boot 应用模块声明此插件后，可使用统一版本进行可执行 JAR 重打包。 -->

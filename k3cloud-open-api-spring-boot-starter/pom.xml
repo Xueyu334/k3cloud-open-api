@@ -15,30 +15,59 @@
     <description>K3 Cloud Open API Spring Boot 自动配置</description>
 
     <dependencies>
+        <!-- 提供金蝶 WebAPI 调用、响应转换、HTTP 客户端及配置对象。 -->
         <dependency>
             <groupId>com.xy</groupId>
             <artifactId>k3cloud-open-api-common</artifactId>
             <version>${project.version}</version>
         </dependency>
 
+        <!-- 提供 Spring Boot 核心启动、自动配置、日志及 YAML 支持。 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-autoconfigure</artifactId>
+            <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
+        <!-- 自动配置上下文测试所需，仅在测试阶段使用。 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 
     <build>
         <plugins>
+            <!-- 使用父 POM 统一的 Java 版本，并生成配置属性与自动配置条件元数据。 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <!-- 处理自动配置类使用的 Lombok 注解。 -->
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                        <!-- 生成 META-INF/spring-configuration-metadata.json，供 IDE 提示配置项。 -->
+                        <path>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-configuration-processor</artifactId>
+                            <version>${spring-boot.version}</version>
+                        </path>
+                        <!-- 生成 META-INF/spring-autoconfigure-metadata.properties，优化条件匹配。 -->
+                        <path>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-autoconfigure-processor</artifactId>
+                            <version>${spring-boot.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
             </plugin>
+
+            <!-- 使用父 POM 的 attach-sources 执行配置生成源码 JAR。 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>

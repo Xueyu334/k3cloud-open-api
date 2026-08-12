@@ -15,12 +15,14 @@
     <description>K3 Cloud WebAPI 通用转换、调用与配置工具</description>
 
     <dependencies>
+        <!-- 提供金蝶 WebAPI 请求、响应及操作结果领域模型。 -->
         <dependency>
             <groupId>com.xy</groupId>
             <artifactId>k3cloud-open-api-domain</artifactId>
             <version>${project.version}</version>
         </dependency>
 
+        <!-- 提供 Jackson、FastJSON2 和 Gson 三种响应转换实现。 -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -33,19 +35,26 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
+
+        <!-- 提供字符串判断、异常信息和对象字符串构建工具。 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
+
+        <!-- WebApiHttpHelper 使用的 HTTP 客户端与连接池实现。 -->
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
         </dependency>
+
+        <!-- 通用模块仅依赖日志门面，由使用方提供具体日志实现。 -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
 
+        <!-- Lombok 仅参与编译，不向使用方传递。 -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -56,10 +65,13 @@
 
     <build>
         <plugins>
+            <!-- 使用父 POM 统一的 Java 版本与 Lombok 注解处理配置。 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
+
+            <!-- 使用父 POM 的 attach-sources 执行配置生成源码 JAR。 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
