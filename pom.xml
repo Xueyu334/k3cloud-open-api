@@ -9,6 +9,7 @@
     <modules>
         <module>k3cloud-open-api-domain</module>
         <module>k3cloud-open-api-common</module>
+        <module>k3cloud-open-api-spring-boot-starter</module>
     </modules>
 
     <properties>
