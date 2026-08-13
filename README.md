@@ -183,3 +183,9 @@ public class K3CloudWebApiConfiguration {
 - `WebApiHttpHelper` 由 Spring 容器管理时会自动关闭；手动创建时应由调用方负责关闭。
 - `print-execute-url` 仅控制执行地址日志，不应在日志中输出应用密钥、SessionId 或完整敏感请求内容。
 - 项目测试不会访问真实金蝶服务；实际网络连通性、账号权限和业务数据仍需在目标环境验证。
+
+## 版权与许可证
+
+Copyright (c) 2026 xueyu
+
+本项目基于[木兰宽松许可证，第 2 版](LICENSE)发布。
