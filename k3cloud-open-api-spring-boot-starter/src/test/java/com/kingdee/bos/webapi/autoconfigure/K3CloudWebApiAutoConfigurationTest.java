@@ -5,15 +5,14 @@ import com.kingdee.bos.webapi.common.utils.WebApiHttpHelper;
 import com.kingdee.bos.webapi.config.properties.WebApiProperties;
 import com.kingdee.bos.webapi.sdk.K3CloudApi;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.annotation.Configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class K3CloudWebApiAutoConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(K3CloudWebApiAutoConfiguration.class))
             .withPropertyValues(
                     "kingdee.k3cloud.web-api.server-url=http://localhost/",
                     "kingdee.k3cloud.web-api.acct-id=test-acct",
@@ -24,8 +23,19 @@ class K3CloudWebApiAutoConfigurationTest {
             );
 
     @Test
-    void shouldBindPropertiesAndCreateWebApiBeans() {
+    void shouldNotCreateWebApiBeansByDefault() {
         contextRunner.run(context -> {
+            assertThat(context).hasNotFailed();
+            assertThat(context).doesNotHaveBean(WebApiProperties.class);
+            assertThat(context).doesNotHaveBean(K3CloudApi.class);
+            assertThat(context).doesNotHaveBean(WebApiHttpHelper.class);
+            assertThat(context).doesNotHaveBean(WebApiHelper.class);
+        });
+    }
+
+    @Test
+    void shouldBindPropertiesAndCreateWebApiBeans() {
+        contextRunner.withUserConfiguration(EnabledConfiguration.class).run(context -> {
             assertThat(context).hasNotFailed();
             assertThat(context).hasSingleBean(WebApiProperties.class);
             assertThat(context).hasSingleBean(K3CloudApi.class);
@@ -37,5 +47,10 @@ class K3CloudWebApiAutoConfigurationTest {
             assertThat(properties.getAcctId()).isEqualTo("test-acct");
             assertThat(properties.getLcId()).isEqualTo(2052);
         });
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @EnableK3CloudWebApi
+    static class EnabledConfiguration {
     }
 }

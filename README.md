@@ -29,7 +29,7 @@
 mvn clean install
 ```
 
-该命令会构建全部模块，并将当前版本安装到本地 Maven 仓库。本文示例使用版本 `1.0.0`。
+该命令会构建全部模块，并将当前版本安装到本地 Maven 仓库。本文示例使用版本 `2.0.0`。
 
 ## Spring Boot 快速开始
 
@@ -40,7 +40,7 @@ mvn clean install
 <dependency>
     <groupId>com.xy</groupId>
     <artifactId>k3cloud-open-api-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
+    <version>2.0.0</version>
 </dependency>
 
 <dependency>
@@ -93,9 +93,32 @@ kingdee:
 
 `server-url`、`acct-id`、`app-id` 或 `app-sec` 缺失时，应用会在创建默认客户端 Bean 时快速失败。
 
-### 3. 注入并调用
+### 3. 启用 Web API
 
-Starter 默认注册以下 Bean：
+在 Spring Boot 应用启动类或配置类上添加 `@EnableK3CloudWebApi`：
+
+```java
+package com.example;
+
+import com.kingdee.bos.webapi.autoconfigure.EnableK3CloudWebApi;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@EnableK3CloudWebApi
+@SpringBootApplication
+public class Application {
+
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+}
+```
+
+仅引入 Starter 不会加载金蝶云星空 Web API 配置，也不会创建相关 Bean。
+
+### 4. 注入并调用
+
+启用后，Starter 默认注册以下 Bean：
 
 - `WebApiProperties`：绑定 `kingdee.k3cloud.web-api` 配置。
 - `K3CloudApi`：金蝶 SDK 客户端，Bean 名为 `k3CloudApiClient`。
@@ -144,8 +167,8 @@ public class MaterialService {
 
 ## 自动配置与扩展
 
-自动配置类通过 `AutoConfiguration.imports` 注册。仅当业务项目已引入金蝶云星空 SDK、类路径中存在 `K3CloudApi` 时启用；仅引入
-Starter 不会触发自动配置。当前版本没有额外的属性开关。
+配置由 `@EnableK3CloudWebApi` 显式导入。仅当业务项目添加该注解且已引入金蝶云星空 SDK、类路径中存在 `K3CloudApi` 时启用；
+仅引入 Starter 不会加载配置。
 
 四个默认 Bean 分别按其返回类型使用 `@ConditionalOnMissingBean`。业务项目声明同类型 Bean 后，对应的默认 Bean 会退让，不依赖
 Bean 名。若只声明自定义 `K3CloudApi`，默认 `WebApiProperties`、`WebApiHttpHelper` 和 `WebApiHelper` 仍会按各自条件创建；此时创建默认
