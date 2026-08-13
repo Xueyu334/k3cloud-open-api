@@ -5,8 +5,8 @@ import com.kingdee.bos.webapi.common.utils.WebApiHelper;
 import com.kingdee.bos.webapi.common.utils.WebApiHttpHelper;
 import com.kingdee.bos.webapi.config.properties.WebApiProperties;
 import com.kingdee.bos.webapi.entity.AppCfg;
+import com.kingdee.bos.webapi.entity.IdentifyInfo;
 import com.kingdee.bos.webapi.sdk.K3CloudApi;
-import com.kingdee.bos.webapi.utils.PrintUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -22,7 +22,6 @@ import org.springframework.context.annotation.Configuration;
  * @author xueyu
  * @see WebApiProperties
  * @see CfgUtilExt
- * @see PrintUtils
  * @see WebApiHelper
  * @see EnableK3CloudWebApi
  */
@@ -93,9 +92,11 @@ public class K3CloudWebApiAutoConfiguration {
                 .stockTimeout(stockTimeout)
                 .proxy(proxy)
                 .build();
+        // 设置 SDK 的 JVM 全局配置，供 HttpUtils#getProxy() 获取代理信息。
         CfgUtilExt.setAppCfgToCfgUtil(appCfg);
-        PrintUtils.setPrint(webApiProperties.isPrintExecuteUrl());
-        return new K3CloudApi();
+        IdentifyInfo identifyInfo = new IdentifyInfo();
+        identifyInfo.copyPropertiesToAppCfg(appCfg);
+        return new K3CloudApi(identifyInfo, webApiProperties.isPrintExecuteUrl());
     }
 
     /**

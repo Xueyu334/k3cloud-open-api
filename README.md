@@ -88,7 +88,7 @@ kingdee:
 | `connect-timeout`   | 否   | `120`   | 连接超时，单位为秒                                                                                 |
 | `request-timeout`   | 否   | `120`   | 请求超时，单位为秒                                                                                 |
 | `stock-timeout`     | 否   | `180`   | 套接字超时，单位为秒；`stock` 是当前 Java 属性的兼容命名                                           |
-| `proxy`             | 否   | 无      | 传递给金蝶 SDK 的代理配置，具体格式以 SDK 8.2.0 要求为准；空字符串按未配置处理                     |
+| `proxy`             | 否   | 无      | 传递给金蝶 SDK 的全局代理配置，具体格式以 SDK 8.2.0 要求为准；空字符串按未配置处理                 |
 | `print-execute-url` | 否   | `false` | 是否记录 WebAPI 执行地址                                                                           |
 
 `server-url`、`acct-id`、`app-id` 或 `app-sec` 缺失时，应用会在创建默认客户端 Bean 时快速失败。
@@ -202,7 +202,7 @@ public class K3CloudWebApiConfiguration {
 
 - 调用前需要在金蝶云星空中创建第三方应用并授予相应接口权限。
 - 生产环境应使用 HTTPS、遵循最小权限原则，并建立应用密钥轮换机制。
-- `CfgUtilExt` 会设置当前 JVM 内金蝶 SDK 的全局配置；同一应用进程应避免同时配置多个账套客户端。
+- `CfgUtilExt` 会设置当前 JVM 内金蝶 SDK 的全局配置，以支持 SDK 通过 `HttpUtils#getProxy()` 获取代理；同一进程中配置多个客户端时，后创建的配置会覆盖先前的全局配置。
 - `WebApiHttpHelper` 由 Spring 容器管理时会自动关闭；手动创建时应由调用方负责关闭。
 - `print-execute-url` 仅控制执行地址日志，不应在日志中输出应用密钥、SessionId 或完整敏感请求内容。
 - 项目测试不会访问真实金蝶服务；实际网络连通性、账号权限和业务数据仍需在目标环境验证。
