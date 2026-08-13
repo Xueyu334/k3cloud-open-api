@@ -6,7 +6,6 @@ import com.kingdee.bos.webapi.domain.dto.response.status.ResponseStatus;
 import com.kingdee.bos.webapi.domain.dto.response.status.SuccessEntitys;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,11 +36,11 @@ public class ConvertResult extends Result {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("responseStatus", responseStatus)
-                .append("responseStatus", responseStatus)
-                .append("convertResponseStatus", convertResponseStatus)
-                .toString();
+        return "ConvertResult{" +
+                "responseStatus=" + responseStatus +
+                ", responseStatus=" + responseStatus +
+                ", convertResponseStatus=" + convertResponseStatus +
+                '}';
     }
 
     /**

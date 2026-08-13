@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSONObject;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * 查看的结果 返回的完整的单据的数据包
@@ -26,9 +25,9 @@ public class ViewResult extends Result {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("result", result)
-                .append("responseStatus", responseStatus)
-                .toString();
+        return "ViewResult{" +
+                "result=" + result +
+                ", responseStatus=" + responseStatus +
+                '}';
     }
 }

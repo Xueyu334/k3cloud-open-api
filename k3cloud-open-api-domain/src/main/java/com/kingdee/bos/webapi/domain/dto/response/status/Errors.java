@@ -3,7 +3,6 @@ package com.kingdee.bos.webapi.domain.dto.response.status;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * 错误列表
@@ -43,10 +42,10 @@ public class Errors {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("dIndex", dIndex)
-                .append("fieldName", fieldName)
-                .append("message", message)
-                .toString();
+        return "Errors{" +
+                "dIndex=" + dIndex +
+                ", fieldName=" + fieldName +
+                ", message=" + message +
+                '}';
     }
 }

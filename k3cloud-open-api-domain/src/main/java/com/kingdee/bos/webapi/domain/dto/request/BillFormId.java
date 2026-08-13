@@ -1,7 +1,6 @@
 package com.kingdee.bos.webapi.domain.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * 顶级抽象类
@@ -29,8 +28,8 @@ public abstract class BillFormId {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("formId", formId)
-                .toString();
+        return "BillFormId{" +
+                "formId=" + formId +
+                '}';
     }
 }

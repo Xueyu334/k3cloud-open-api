@@ -3,7 +3,6 @@ package com.kingdee.bos.webapi.domain.dto.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.Collections;
 import java.util.List;
@@ -44,11 +43,11 @@ public class DeleteRequest extends BillFormId {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("createOrgId", createOrgId)
-                .append("numbers", numbers)
-                .append("ids", ids)
-                .append("networkCtrl", networkCtrl)
-                .toString();
+        return "DeleteRequest{" +
+                "createOrgId=" + createOrgId +
+                ", numbers=" + numbers +
+                ", ids=" + ids +
+                ", networkCtrl=" + networkCtrl +
+                '}';
     }
 }

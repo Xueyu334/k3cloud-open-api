@@ -24,12 +24,6 @@
             <artifactId>fastjson2</artifactId>
         </dependency>
 
-        <!-- 部分请求、响应对象使用 ToStringBuilder。 -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-        </dependency>
-
         <!-- Lombok 仅参与编译，不向使用方传递。 -->
         <dependency>
             <groupId>org.projectlombok</groupId>

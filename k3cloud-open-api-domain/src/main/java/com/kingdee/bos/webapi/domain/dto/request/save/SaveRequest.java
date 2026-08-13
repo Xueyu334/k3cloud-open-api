@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kingdee.bos.webapi.domain.dto.request.BillFormId;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.List;
 
@@ -112,21 +111,21 @@ public class SaveRequest extends BillFormId {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("needUpDateFields", needUpDateFields)
-                .append("needReturnFields", needReturnFields)
-                .append("isDeleteEntry", isDeleteEntry)
-                .append("subSystemId", subSystemId)
-                .append("isVerifyBaseDataField", isVerifyBaseDataField)
-                .append("isEntryBatchFill", isEntryBatchFill)
-                .append("validateFlag", validateFlag)
-                .append("numberSearch", numberSearch)
-                .append("isAutoAdjustField", isAutoAdjustField)
-                .append("interationFlags", interationFlags)
-                .append("ignoreInterationFlag", ignoreInterationFlag)
-                .append("isControlPrecision", isControlPrecision)
-                .append("validateRepeatJson", validateRepeatJson)
-                .append("model", model)
-                .toString();
+        return "SaveRequest{" +
+                "needUpDateFields=" + needUpDateFields +
+                ", needReturnFields=" + needReturnFields +
+                ", isDeleteEntry=" + isDeleteEntry +
+                ", subSystemId=" + subSystemId +
+                ", isVerifyBaseDataField=" + isVerifyBaseDataField +
+                ", isEntryBatchFill=" + isEntryBatchFill +
+                ", validateFlag=" + validateFlag +
+                ", numberSearch=" + numberSearch +
+                ", isAutoAdjustField=" + isAutoAdjustField +
+                ", interationFlags=" + interationFlags +
+                ", ignoreInterationFlag=" + ignoreInterationFlag +
+                ", isControlPrecision=" + isControlPrecision +
+                ", validateRepeatJson=" + validateRepeatJson +
+                ", model=" + model +
+                '}';
     }
 }

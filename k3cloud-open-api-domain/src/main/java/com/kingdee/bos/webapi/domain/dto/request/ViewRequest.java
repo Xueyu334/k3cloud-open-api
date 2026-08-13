@@ -3,7 +3,6 @@ package com.kingdee.bos.webapi.domain.dto.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Getter
 @Setter
@@ -37,11 +36,11 @@ public class ViewRequest extends BillFormId {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("createOrgId", createOrgId)
-                .append("number", number)
-                .append("id", id)
-                .append("isSortBySeq", isSortBySeq)
-                .toString();
+        return "ViewRequest{" +
+                "createOrgId=" + createOrgId +
+                ", number=" + number +
+                ", id=" + id +
+                ", isSortBySeq=" + isSortBySeq +
+                '}';
     }
 }

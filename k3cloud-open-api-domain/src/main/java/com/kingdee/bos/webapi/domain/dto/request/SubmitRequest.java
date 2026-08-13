@@ -3,7 +3,6 @@ package com.kingdee.bos.webapi.domain.dto.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.List;
 
@@ -59,14 +58,14 @@ public class SubmitRequest extends BillFormId {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("createOrgId", createOrgId)
-                .append("numbers", numbers)
-                .append("ids", ids)
-                .append("selectedPostId", selectedPostId)
-                .append("useOrgId", useOrgId)
-                .append("networkCtrl", networkCtrl)
-                .append("ignoreInterationFlag", ignoreInterationFlag)
-                .toString();
+        return "SubmitRequest{" +
+                "createOrgId=" + createOrgId +
+                ", numbers=" + numbers +
+                ", ids=" + ids +
+                ", selectedPostId=" + selectedPostId +
+                ", useOrgId=" + useOrgId +
+                ", networkCtrl=" + networkCtrl +
+                ", ignoreInterationFlag=" + ignoreInterationFlag +
+                '}';
     }
 }

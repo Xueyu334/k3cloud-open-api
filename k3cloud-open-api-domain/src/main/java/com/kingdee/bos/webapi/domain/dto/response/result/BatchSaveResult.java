@@ -3,7 +3,6 @@ package com.kingdee.bos.webapi.domain.dto.response.result;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.List;
 import java.util.Map;
@@ -28,9 +27,9 @@ public class BatchSaveResult extends Result {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("needReturnData", needReturnData)
-                .append("responseStatus", responseStatus)
-                .toString();
+        return "BatchSaveResult{" +
+                "needReturnData=" + needReturnData +
+                ", responseStatus=" + responseStatus +
+                '}';
     }
 }

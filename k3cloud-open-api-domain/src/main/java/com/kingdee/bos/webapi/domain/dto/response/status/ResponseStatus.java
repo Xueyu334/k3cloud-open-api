@@ -4,7 +4,6 @@ package com.kingdee.bos.webapi.domain.dto.response.status;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.List;
 
@@ -74,14 +73,14 @@ public class ResponseStatus {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("errorCode", errorCode)
-                .append("errors", errors)
-                .append("isSuccess", isSuccess)
-                .append("msgCode", msgCode)
-                .append("successEntitys", successEntitys)
-                .append("successMessages", successMessages)
-                .toString();
+        return "ResponseStatus{" +
+                "errorCode=" + errorCode +
+                ", errors=" + errors +
+                ", isSuccess=" + isSuccess +
+                ", msgCode=" + msgCode +
+                ", successEntitys=" + successEntitys +
+                ", successMessages=" + successMessages +
+                '}';
     }
 
 }

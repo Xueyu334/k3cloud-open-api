@@ -7,7 +7,6 @@ import com.kingdee.bos.webapi.domain.dto.response.status.ResponseStatus;
 import com.kingdee.bos.webapi.entity.RepoRet;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -70,8 +69,8 @@ public class WebApiResp<R extends Result> implements Serializable {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("result", result)
-                .toString();
+        return "WebApiResp{" +
+                "result=" + result +
+                '}';
     }
 }
