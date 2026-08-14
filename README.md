@@ -7,7 +7,7 @@
 | 模块                                   | 说明                                                                     |
 |----------------------------------------|--------------------------------------------------------------------------|
 | `k3cloud-open-api-domain`              | 保存、查询、提交、审核等接口的请求与响应模型                             |
-| `k3cloud-open-api-common`              | WebAPI 调用工具、HTTP 客户端、异常及 FastJSON2、Gson、Jackson 响应转换器 |
+| `k3cloud-open-api-common`              | WebAPI 调用工具、会话/签名 HTTP 客户端、异常及多种响应转换器             |
 | `k3cloud-open-api-spring-boot-starter` | 配置属性绑定及 Spring Boot 自动配置                                      |
 
 ## 兼容基线
@@ -29,7 +29,7 @@
 mvn clean install
 ```
 
-该命令会构建全部模块，并将当前版本安装到本地 Maven 仓库。本文示例使用版本 `2.0.0`。
+该命令会构建全部模块，并将当前版本安装到本地 Maven 仓库。本文示例使用版本 `3.0.0`。
 
 ## Spring Boot 快速开始
 
@@ -40,13 +40,13 @@ mvn clean install
 <dependency>
     <groupId>com.xy</groupId>
     <artifactId>k3cloud-open-api-spring-boot-starter</artifactId>
-    <version>2.0.0</version>
+    <version>3.0.0</version>
 </dependency>
 
 <dependency>
-<groupId>com.kingdee</groupId>
-<artifactId>k3cloud-webapi-sdk-jdk11</artifactId>
-<version>8.2.0</version>
+    <groupId>com.kingdee</groupId>
+    <artifactId>k3cloud-webapi-sdk-jdk11</artifactId>
+    <version>8.2.0</version>
 </dependency>
 ```
 
@@ -108,7 +108,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class Application {
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
 }
@@ -123,14 +123,15 @@ public class Application {
 - `WebApiProperties`：绑定 `kingdee.k3cloud.web-api` 配置。
 - `K3CloudApi`：金蝶 SDK 客户端，Bean 名为 `k3CloudApiClient`。
 - `WebApiHelper`：基于金蝶 SDK 的常用接口封装。
-- `WebApiHttpHelper`：基于 Apache HttpClient 5 的调用工具，容器关闭时自动释放连接资源。
+- `SessionWebApiHttpHelper`：使用 `LoginBySign` 自动登录并维护会话的 HTTP 客户端。
+- `SignedWebApiHttpHelper`：参照 SDK `ApiRequester#buildHeader` 为每次请求生成签名的 HTTP 客户端。
 
 推荐使用构造器注入：
 
 ```java
 package com.example.material;
 
-import com.kingdee.bos.webapi.common.utils.WebApiHelper;
+import com.kingdee.bos.webapi.common.utils.api.sdk.WebApiHelper;
 import com.kingdee.bos.webapi.domain.dto.request.save.ModelMap;
 import com.kingdee.bos.webapi.domain.dto.request.save.SaveRequest;
 import com.kingdee.bos.webapi.domain.dto.response.WebApiResp;
@@ -165,14 +166,53 @@ public class MaterialService {
 
 示例中的表单标识和字段仅用于展示调用方式。实际保存字段、必填项和字段类型应以目标账套的表单元数据为准。
 
+### 5. 选择 HTTP 认证方式
+
+Starter 会同时注册会话认证和逐请求签名两个 HTTP 客户端，业务代码可以按具体类型注入需要的实现：
+
+| 实现                         | 认证方式                 | 适用场景                                                   |
+|------------------------------|--------------------------|------------------------------------------------------------|
+| `SessionWebApiHttpHelper`    | 自动登录并复用 SessionId | 需要兼容传统登录会话、连续执行多次请求                     |
+| `SignedWebApiHttpHelper`     | 每次请求生成签名请求头   | 希望避免维护登录状态，直接采用 SDK `buildHeader` 认证规则  |
+
+两个实现均继承 `AbstractWebApiHttpHelper`，共享连接池、Cookie、请求执行、响应转换和资源关闭逻辑，并提供
+`execute`、`save`、`executeBillQuery` 等便捷方法。例如使用逐请求签名客户端保存单据：
+
+```java
+package com.example.material;
+
+import com.kingdee.bos.webapi.common.utils.api.http.SignedWebApiHttpHelper;
+import com.kingdee.bos.webapi.domain.dto.request.save.SaveRequest;
+import com.kingdee.bos.webapi.domain.dto.response.WebApiResp;
+import com.kingdee.bos.webapi.domain.dto.response.result.SaveResult;
+import org.springframework.stereotype.Service;
+
+@Service
+public class SignedMaterialService {
+
+    private final SignedWebApiHttpHelper webApiHttpHelper;
+
+    public SignedMaterialService(SignedWebApiHttpHelper webApiHttpHelper) {
+        this.webApiHttpHelper = webApiHttpHelper;
+    }
+
+    public WebApiResp<SaveResult> save(String formId, SaveRequest request) {
+        return webApiHttpHelper.save(formId, request);
+    }
+}
+```
+
+两种实现遇到 HTTP 状态码大于等于 `400` 时，都会抛出 `WebApiInvokeException`；异常中保留 HTTP 状态码，
+异常消息中包含服务端响应内容。金蝶返回 HTTP `200` 但业务响应表示失败时，仍应根据响应对象判断业务结果。
+
 ## 自动配置与扩展
 
 配置由 `@EnableK3CloudWebApi` 显式导入。仅当业务项目添加该注解且已引入金蝶云星空 SDK、类路径中存在 `K3CloudApi` 时启用；
 仅引入 Starter 不会加载配置。
 
-四个默认 Bean 分别按其返回类型使用 `@ConditionalOnMissingBean`。业务项目声明同类型 Bean 后，对应的默认 Bean 会退让，不依赖
-Bean 名。若只声明自定义 `K3CloudApi`，默认 `WebApiProperties`、`WebApiHttpHelper` 和 `WebApiHelper` 仍会按各自条件创建；此时创建默认
-`K3CloudApi` 所需的四项必填配置不再校验，但默认 `WebApiHttpHelper` 仍需要完整、有效的连接参数才能正常调用。
+五个默认 Bean 分别按其返回类型使用 `@ConditionalOnMissingBean`。业务项目声明同类型 Bean 后，对应的默认 Bean 会退让，不依赖
+Bean 名。若只声明自定义 `K3CloudApi`，默认 `WebApiProperties`、两个 HTTP Helper 和 `WebApiHelper` 仍会按各自条件创建；此时创建默认
+`K3CloudApi` 所需的四项必填配置不再校验，但两个 HTTP Helper 仍需要完整、有效的连接及认证参数才能正常调用。
 
 业务项目可以声明同类型 Bean 覆盖默认实现。例如，使用自定义 Jackson `ObjectMapper` 创建 `WebApiHelper`：
 
@@ -181,7 +221,7 @@ package com.example.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kingdee.bos.webapi.common.convert.jackson.JacksonConvertApiResponse;
-import com.kingdee.bos.webapi.common.utils.WebApiHelper;
+import com.kingdee.bos.webapi.common.utils.api.sdk.WebApiHelper;
 import com.kingdee.bos.webapi.sdk.K3CloudApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -196,14 +236,24 @@ public class K3CloudWebApiConfiguration {
 }
 ```
 
-默认的 `WebApiHelper` 和 `WebApiHttpHelper` 使用 FastJSON2 响应转换器；common 模块同时提供 Gson 和 Jackson 实现供调用方显式选择。
+默认的 `WebApiHelper`、`SessionWebApiHttpHelper` 和 `SignedWebApiHttpHelper` 使用 FastJSON2 响应转换器；common 模块同时提供 Gson 和
+Jackson 实现供调用方显式选择。
+
+## 3.0.0 升级说明
+
+3.0.0 调整了公共工具类的包结构和 HTTP 客户端抽象，升级时需要同步修改调用方：
+
+- `WebApiHelper` 从 `com.kingdee.bos.webapi.common.utils` 移至 `com.kingdee.bos.webapi.common.utils.api.sdk`。
+- 原 `WebApiHttpHelper` 由 `SessionWebApiHttpHelper` 替代，并新增 `SignedWebApiHttpHelper`。
+- 两个 HTTP 客户端共同继承 `AbstractWebApiHttpHelper`，业务便捷方法和 HTTP 生命周期由父类统一管理。
+- HTTP 状态码大于等于 `400` 时，两个 HTTP 客户端现在统一抛出 `WebApiInvokeException`。
 
 ## 注意事项
 
 - 调用前需要在金蝶云星空中创建第三方应用并授予相应接口权限。
 - 生产环境应使用 HTTPS、遵循最小权限原则，并建立应用密钥轮换机制。
 - `CfgUtilExt` 会设置当前 JVM 内金蝶 SDK 的全局配置，以支持 SDK 通过 `HttpUtils#getProxy()` 获取代理；同一进程中配置多个客户端时，后创建的配置会覆盖先前的全局配置。
-- `WebApiHttpHelper` 由 Spring 容器管理时会自动关闭；手动创建时应由调用方负责关闭。
+- `SessionWebApiHttpHelper` 和 `SignedWebApiHttpHelper` 由 Spring 容器管理时会自动关闭；手动创建时应由调用方负责关闭。
 - `print-execute-url` 仅控制执行地址日志，不应在日志中输出应用密钥、SessionId 或完整敏感请求内容。
 - 项目测试不会访问真实金蝶服务；实际网络连通性、账号权限和业务数据仍需在目标环境验证。
 

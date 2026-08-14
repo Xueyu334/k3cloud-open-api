@@ -1,8 +1,9 @@
 package com.kingdee.bos.webapi.autoconfigure;
 
 import com.kingdee.bos.webapi.common.utils.CfgUtilExt;
-import com.kingdee.bos.webapi.common.utils.WebApiHelper;
-import com.kingdee.bos.webapi.common.utils.WebApiHttpHelper;
+import com.kingdee.bos.webapi.common.utils.api.http.SessionWebApiHttpHelper;
+import com.kingdee.bos.webapi.common.utils.api.http.SignedWebApiHttpHelper;
+import com.kingdee.bos.webapi.common.utils.api.sdk.WebApiHelper;
 import com.kingdee.bos.webapi.config.properties.WebApiProperties;
 import com.kingdee.bos.webapi.entity.AppCfg;
 import com.kingdee.bos.webapi.entity.IdentifyInfo;
@@ -107,8 +108,20 @@ public class K3CloudWebApiAutoConfiguration {
      */
     @Bean(destroyMethod = "close")
     @ConditionalOnMissingBean
-    public WebApiHttpHelper k3CloudWebApiHttpHelper(WebApiProperties webApiProperties) {
-        return WebApiHttpHelper.of(webApiProperties);
+    public SessionWebApiHttpHelper sessionWebApiHttpHelper(WebApiProperties webApiProperties) {
+        return SessionWebApiHttpHelper.of(webApiProperties);
+    }
+
+    /**
+     * 创建使用逐请求签名认证的金蝶云星空 Web API HTTP 请求辅助工具。
+     *
+     * @param webApiProperties 配置参数
+     * @return 逐请求签名 HTTP 请求辅助工具
+     */
+    @Bean(destroyMethod = "close")
+    @ConditionalOnMissingBean
+    public SignedWebApiHttpHelper signedK3CloudWebApiHttpHelper(WebApiProperties webApiProperties) {
+        return SignedWebApiHttpHelper.of(webApiProperties);
     }
 
     /**

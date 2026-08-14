@@ -1,7 +1,8 @@
 package com.kingdee.bos.webapi.autoconfigure;
 
-import com.kingdee.bos.webapi.common.utils.WebApiHelper;
-import com.kingdee.bos.webapi.common.utils.WebApiHttpHelper;
+import com.kingdee.bos.webapi.common.utils.api.http.SessionWebApiHttpHelper;
+import com.kingdee.bos.webapi.common.utils.api.http.SignedWebApiHttpHelper;
+import com.kingdee.bos.webapi.common.utils.api.sdk.WebApiHelper;
 import com.kingdee.bos.webapi.config.properties.WebApiProperties;
 import com.kingdee.bos.webapi.entity.AppCfg;
 import com.kingdee.bos.webapi.entity.IdentifyInfo;
@@ -47,7 +48,8 @@ class K3CloudWebApiAutoConfigurationTest {
             assertThat(context).hasNotFailed();
             assertThat(context).doesNotHaveBean(WebApiProperties.class);
             assertThat(context).doesNotHaveBean(K3CloudApi.class);
-            assertThat(context).doesNotHaveBean(WebApiHttpHelper.class);
+            assertThat(context).doesNotHaveBean(SessionWebApiHttpHelper.class);
+            assertThat(context).doesNotHaveBean(SignedWebApiHttpHelper.class);
             assertThat(context).doesNotHaveBean(WebApiHelper.class);
         });
     }
@@ -58,7 +60,8 @@ class K3CloudWebApiAutoConfigurationTest {
             assertThat(context).hasNotFailed();
             assertThat(context).hasSingleBean(WebApiProperties.class);
             assertThat(context).hasSingleBean(K3CloudApi.class);
-            assertThat(context).hasSingleBean(WebApiHttpHelper.class);
+            assertThat(context).hasSingleBean(SessionWebApiHttpHelper.class);
+            assertThat(context).hasSingleBean(SignedWebApiHttpHelper.class);
             assertThat(context).hasSingleBean(WebApiHelper.class);
 
             WebApiProperties properties = context.getBean(WebApiProperties.class);

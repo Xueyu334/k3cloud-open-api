@@ -1,4 +1,4 @@
-package com.kingdee.bos.webapi.common.utils;
+package com.kingdee.bos.webapi.common.utils.api.sdk;
 
 
 import com.alibaba.fastjson2.JSON;

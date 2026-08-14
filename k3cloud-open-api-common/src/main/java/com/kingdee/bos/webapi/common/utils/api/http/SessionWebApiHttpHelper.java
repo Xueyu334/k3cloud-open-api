@@ -1,53 +1,34 @@
-package com.kingdee.bos.webapi.common.utils;
+package com.kingdee.bos.webapi.common.utils.api.http;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONPath;
 import com.kingdee.bos.webapi.common.convert.WebApiResponseConverter;
 import com.kingdee.bos.webapi.common.convert.fastjson.FastJsonConvertApiResponse;
 import com.kingdee.bos.webapi.common.enums.WebApiService;
 import com.kingdee.bos.webapi.common.exception.WebApiInvokeException;
 import com.kingdee.bos.webapi.config.properties.WebApiProperties;
-import com.kingdee.bos.webapi.domain.dto.request.save.SaveRequest;
-import com.kingdee.bos.webapi.domain.dto.response.WebApiResp;
 import com.kingdee.bos.webapi.domain.dto.response.result.LoginResult;
-import com.kingdee.bos.webapi.domain.dto.response.result.SaveResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.config.ConnectionConfig;
-import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.cookie.BasicCookieStore;
-import org.apache.hc.client5.http.cookie.CookieStore;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
-import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.Header;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.hc.core5.http.io.entity.StringEntity;
-import org.apache.hc.core5.util.Timeout;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
- * WebApiHttpHelper 是一个用于处理金蝶 K3Cloud Web API 的辅助类。
- * 该类通过封装 WebApiProperties 和 WebApiResponseConverter，提供对 Web API 请求的配置和响应解析支持。
+ * 使用登录会话认证调用金蝶 K3Cloud Web API 的 HTTP 辅助类。
  * <p>
- * WebApiProperties 包含了与 Web API 交互所需的配置信息，例如服务地址、账套ID、用户凭据等。
- * WebApiResponseConverter 提供了将 API 响应字符串解析为特定业务对象的功能，支持多种业务场景的响应解析。
- * <p>
- * 该类采用私有构造函数设计，确保实例化时必须提供必要的依赖项。
- * 通过这种方式，保证了类的使用安全性和依赖注入的灵活性。
+ * 本类负责 {@code LoginBySign} 登录、SessionId 注入和会话有效性检查，公共 HTTP
+ * 执行与资源生命周期由 {@link AbstractWebApiHttpHelper} 管理。
+ * </p>
  *
  * @author xueyu
+ * @see AbstractWebApiHttpHelper
+ * @since 3.0.0
  */
 @Slf4j
-public class WebApiHttpHelper implements AutoCloseable {
+public class SessionWebApiHttpHelper extends AbstractWebApiHttpHelper {
 
     /**
      * 会话检查的最小时间间隔，单位为毫秒。
@@ -58,31 +39,10 @@ public class WebApiHttpHelper implements AutoCloseable {
      */
     private static final long SESSION_CHECK_INTERVAL_MS = 30_000;
     /**
-     * Kingdee K3Cloud Web API 的配置属性。
-     */
-    private final WebApiProperties webApiProperties;
-    /**
-     * API 响应的转换器。
-     */
-    private final WebApiResponseConverter webApiResponseConverter;
-
-    /**
-     * Cookie存储管理器，用于在HTTP客户端中持久化和管理会话Cookie。
-     * 该实例基于Apache HttpClient的BasicCookieStore实现，负责存储由服务器返回的Cookie信息，
-     * 并在后续的请求中自动附加这些Cookie，以维持会话状态。
-     * 这对于需要保持登录状态或跨请求共享认证信息的Web API交互至关重要。
-     * 该存储管理器确保Cookie在客户端生命周期内得到妥善保存，并在HTTP客户端关闭时随之清理。
-     */
-    private final CookieStore cookieStore = new BasicCookieStore();
-    /**
      * 用于存储当前登录结果，包括会话ID等信息。
      * 使用 volatile 关键字确保多线程环境下对 loginResult 的可见性。
      */
     private volatile LoginResult loginResult;
-    /**
-     * 持久化的 CloseableHttpClient 实例，用于发送 HTTP 请求并自动管理会话。
-     */
-    private CloseableHttpClient httpClient;
     /**
      * 记录最近一次成功校验会话有效性的时间戳。
      * 该字段用于控制会话校验的频率，避免过于频繁地发送心跳请求。
@@ -102,10 +62,8 @@ public class WebApiHttpHelper implements AutoCloseable {
      * @param webApiResponseConverter 用于解析 API 响应字符串的转换器实例。
      *                                该参数提供了将 API 响应解析为特定业务对象的能力，支持多种业务场景的响应处理。
      */
-    private WebApiHttpHelper(WebApiProperties webApiProperties, WebApiResponseConverter webApiResponseConverter) {
-        this.webApiProperties = webApiProperties;
-        this.webApiResponseConverter = webApiResponseConverter;
-        initHttpClient();
+    private SessionWebApiHttpHelper(WebApiProperties webApiProperties, WebApiResponseConverter webApiResponseConverter) {
+        super(webApiProperties, webApiResponseConverter);
     }
 
     /**
@@ -117,7 +75,7 @@ public class WebApiHttpHelper implements AutoCloseable {
      *                         该参数不能为空，且其内容通常通过配置文件或外部化方式进行管理。
      * @return 返回一个初始化完成的 WebApiHttpHelper 实例，用于处理 Web API 请求和响应。
      */
-    public static WebApiHttpHelper of(final WebApiProperties webApiProperties) {
+    public static SessionWebApiHttpHelper of(final WebApiProperties webApiProperties) {
         return of(webApiProperties, FastJsonConvertApiResponse.INSTANCE);
     }
 
@@ -133,77 +91,14 @@ public class WebApiHttpHelper implements AutoCloseable {
      *                           该参数不能为空。
      * @return 返回一个 WebApiHttpHelper 实例，用于处理金蝶 K3Cloud Web API 的请求和响应。
      */
-    private static WebApiHttpHelper of(WebApiProperties webApiProperties, WebApiResponseConverter convertApiResponse) {
+    public static SessionWebApiHttpHelper of(WebApiProperties webApiProperties, WebApiResponseConverter convertApiResponse) {
         if (Objects.isNull(webApiProperties)) {
             throw new NullPointerException("云星空WebApi客户端不能为空!");
         }
         if (Objects.isNull(convertApiResponse)) {
             throw new NullPointerException("响应消息转换插件不能为空!");
         }
-        return new WebApiHttpHelper(webApiProperties, convertApiResponse);
-    }
-
-    /**
-     * 初始化HTTP客户端实例。
-     * 该方法配置并构建一个用于与金蝶K3Cloud Web API进行通信的HttpClient。
-     * 配置包括连接层参数（如TCP连接建立超时）和请求层参数（如从连接池获取连接的等待时间、等待服务端响应的超时时间）。
-     * 使用连接池管理器来管理HTTP连接，以提高性能并复用连接。
-     * 同时，该方法会添加一个请求拦截器，用于在每次请求前自动注入有效的会话ID（kdservice-sessionid）到请求头中，以确保请求的认证状态。
-     * 初始化后的HttpClient实例将存储在类的httpClient成员变量中，供后续API调用使用。
-     * 此方法通常在类的内部被调用，以确保HttpClient在使用前已被正确配置。
-     */
-    private void initHttpClient() {
-        // 配置请求层参数（获取连接、等待响应超时）
-        RequestConfig requestConfig = RequestConfig.custom()
-                // 从连接池获取连接的等待时间
-                .setConnectionRequestTimeout(Timeout.ofSeconds(webApiProperties.getRequestTimeout()))
-                // 等待服务端响应的超时时间
-                .setResponseTimeout(Timeout.ofSeconds(webApiProperties.getStockTimeout()))
-                .build();
-        // 配置连接层参数（TCP 连接建立超时）
-        ConnectionConfig connectionConfig = ConnectionConfig.custom()
-                .setConnectTimeout(Timeout.ofSeconds(webApiProperties.getConnectTimeout()))
-                .build();
-        // 构建连接管理器，并应用连接配置
-        PoolingHttpClientConnectionManager clientConnectionManager = PoolingHttpClientConnectionManagerBuilder.create()
-                // 设置默认连接配置（包含 connectTimeout）
-                .setDefaultConnectionConfig(connectionConfig)
-                .setMaxConnTotal(120)
-                .setMaxConnPerRoute(35)
-                .build();
-        // 构建 HttpClient
-        this.httpClient = HttpClients.custom()
-                // 设置连接管理器
-                .setConnectionManager(clientConnectionManager)
-                // 设置默认请求配置
-                .setDefaultRequestConfig(requestConfig)
-                // 添加请求拦截器，在每次请求前注入 SessionId
-                .addRequestInterceptorLast((request, entity, context) -> {
-                    if (loginResult != null && loginResult.isLoginSuccess() && loginResult.getKdsvcSessionId() != null) {
-                        request.setHeader("kdservice-sessionid", loginResult.getKdsvcSessionId());
-                    }
-                })
-                //添加默认的 cookie 管理器
-                .setDefaultCookieStore(cookieStore)
-                .build();
-    }
-
-    /**
-     * 获取金蝶 K3Cloud Web API 服务接口的完整 URL。
-     * 该方法会根据配置的服务器地址和提供的服务名称构建完整的请求 URL。
-     *
-     * @param serviceName API 服务名称，例如 "Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginBySign"
-     * @return 完整的 API 服务 URL。
-     */
-    private String getServiceUrl(String serviceName) {
-        String url = this.webApiProperties.getServerUrl();
-        if (url == null) {
-            url = "";
-        }
-        if (!url.endsWith("/")) {
-            url += "/";
-        }
-        return url + serviceName + ".common.kdsvc";
+        return new SessionWebApiHttpHelper(webApiProperties, convertApiResponse);
     }
 
     /**
@@ -285,33 +180,10 @@ public class WebApiHttpHelper implements AutoCloseable {
      * @throws WebApiInvokeException 如果 LoginBySign 调用失败。
      */
     public LoginResult loginBySign() {
-        String url = this.getServiceUrl(WebApiService.LOGIN_BY_SIGN.getServiceName());
-        if (webApiProperties.isPrintExecuteUrl()) {
-            log.info("Kingdee K3Cloud Web API Login URL: {}", url);
-        }
-        Map<String, Object> bodyMap = new HashMap<>();
-        bodyMap.put("parameters", this.buildLoginBySignParams());
-        String jsonBody = JSON.toJSONString(bodyMap);
-
         try {
-            HttpPost httpPost = new HttpPost(url);
-            httpPost.setEntity(new StringEntity(jsonBody,
-                    ContentType.APPLICATION_JSON,
-                    StandardCharsets.UTF_8.name(), false));
-
-            String response = this.httpClient.execute(httpPost, classicHttpResponse -> {
-                HttpEntity entity = classicHttpResponse.getEntity();
-                // 尝试获取并打印Set-Cookie头部信息
-                Header[] cookies = classicHttpResponse.getHeaders("Set-Cookie");
-                if (cookies != null) {
-                    for (Header cookie : cookies) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("登录响应 Set-Cookie: {}", cookie.getValue());
-                        }
-                    }
-                }
-                return EntityUtils.toString(entity);
-            });
+            String response = executeRaw(
+                    WebApiService.LOGIN_BY_SIGN.getServiceName(),
+                    buildLoginBySignParams());
             if (log.isDebugEnabled()) {
                 log.debug("登录响应: {}", response);
             }
@@ -319,11 +191,42 @@ public class WebApiHttpHelper implements AutoCloseable {
             // 更新登录结果
             this.loginResult = result;
             return result;
+        } catch (WebApiInvokeException e) {
+            this.loginResult = null;
+            throw e;
         } catch (Exception e) {
             // 在登录失败时将 loginResult 置为 null
             this.loginResult = null;
             throw new WebApiInvokeException("LoginBySign failed", e);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void beforeExecute() {
+        ensureLogin();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void customizeRequest(HttpPost request, String requestUrl) {
+        if (loginResult != null && loginResult.isLoginSuccess() && loginResult.getKdsvcSessionId() != null) {
+            request.setHeader("kdservice-sessionid", loginResult.getKdsvcSessionId());
+        }
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void clearAuthenticationState() {
+        loginResult = null;
+        lastSessionCheckTime = 0L;
     }
 
     /**
@@ -354,130 +257,6 @@ public class WebApiHttpHelper implements AutoCloseable {
             if (log.isDebugEnabled()) {
                 log.debug("重新登录成功，SessionId: {}", reloginResult.getKdsvcSessionId());
             }
-        }
-    }
-
-    /**
-     * 执行金蝶K3Cloud Web API请求。
-     * 该方法首先确保当前会话处于有效的登录状态，然后调用原始执行方法发送请求。
-     * 适用于需要认证的API服务调用。
-     *
-     * @param serviceName API服务名称，例如"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Save"。
-     * @param parameters  API请求参数数组，将被序列化为JSON格式并发送。
-     * @return API服务器返回的原始响应字符串。
-     */
-    public String execute(String serviceName, Object[] parameters) {
-        if (serviceName == null || serviceName.isBlank()) {
-            throw new IllegalArgumentException("serviceName 不能为空");
-        }
-        if (parameters == null) {
-            throw new IllegalArgumentException("parameters 不能为空");
-        }
-        ensureLogin();
-        return executeRaw(serviceName, parameters);
-    }
-
-    /**
-     * 执行金蝶K3Cloud Web API的原始请求。
-     * 该方法负责构建HTTP POST请求，将参数序列化为JSON格式，并发送至指定的API服务端点。
-     * 若请求过程中发生IO异常，将抛出WebApiInvokeException。
-     *
-     * @param serviceName API服务名称，例如"Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Save"。
-     * @param parameters  API请求参数数组，将被封装为JSON对象中的"parameters"字段。
-     * @return API服务器返回的原始响应字符串。
-     * @throws WebApiInvokeException 当调用K3Cloud Web API过程中发生IO异常时抛出。
-     */
-    private String executeRaw(String serviceName, Object[] parameters) {
-        if (serviceName == null || serviceName.isBlank()) {
-            throw new IllegalArgumentException("serviceName 不能为空");
-        }
-        if (parameters == null) {
-            throw new IllegalArgumentException("parameters 不能为空");
-        }
-        String url = getServiceUrl(serviceName);
-        if (webApiProperties.isPrintExecuteUrl()) {
-            log.info("Kingdee K3Cloud Web API Execute URL: {}", url);
-        }
-        Map<String, Object> bodyMap = new HashMap<>();
-        bodyMap.put("parameters", parameters);
-        String jsonBody = JSON.toJSONString(bodyMap);
-        try {
-            HttpPost httpPost = new HttpPost(url);
-            httpPost.setEntity(new StringEntity(jsonBody,
-                    ContentType.APPLICATION_JSON,
-                    StandardCharsets.UTF_8.name(), false));
-
-            return httpClient.execute(httpPost, classicHttpResponse ->
-                    EntityUtils.toString(classicHttpResponse.getEntity())
-            );
-        } catch (IOException e) {
-            throw new WebApiInvokeException("调用K3Cloud Web API 出现异常!", e);
-        }
-    }
-
-    /**
-     * 关闭当前辅助类持有的 HTTP 资源。
-     * <p>
-     * 关闭 {@link CloseableHttpClient} 时会同时释放其管理的连接池和池内连接；
-     * 此外，本方法还会清空 Cookie、登录结果及会话检查状态。
-     * </p>
-     * 在 {@code WebApiHttpHelper} 实例不再使用时，应调用此方法释放资源。
-     * 实现 {@code AutoCloseable} 接口，允许在 try-with-resources 语句中使用。
-     *
-     * @throws IOException 关闭 HTTP 客户端时发生 I/O 异常
-     */
-    @Override
-    public void close() throws IOException {
-        try {
-            if (httpClient != null) {
-                httpClient.close();
-            }
-        } finally {
-            httpClient = null;
-            cookieStore.clear();
-            loginResult = null;
-            lastSessionCheckTime = 0L;
-        }
-    }
-
-    /**
-     * 执行金蝶 K3Cloud Web API 的保存操作。
-     * 该方法封装了通用的 API 执行逻辑，专门用于处理保存操作。
-     *
-     * @param formId 表单标识，例如 "BD_Material"。
-     * @param data   要保存的数据对象，将被序列化为 JSON 字符串。
-     * @return 包含保存结果的 {@code WebApiResp<SaveResult>} 对象。
-     */
-    public WebApiResp<SaveResult> save(String formId, SaveRequest data) {
-        Object[] parameters = new Object[]{formId, JSON.toJSONString(data)};
-        String response = execute(WebApiService.SAVE.getServiceName(), parameters);
-        return webApiResponseConverter.parseSaveWebApiResponse(response);
-    }
-
-    /**
-     * 执行金蝶云星空单据查询（ExecuteBillQuery）
-     *
-     * @param data 查询 JSON 字符串
-     * @return 查询结果二维列表
-     */
-    public List<List<Object>> executeBillQuery(String data) {
-        // 参数校验
-        if (data == null || data.isBlank()) {
-            throw new IllegalArgumentException("executeBillQuery 参数 data 不能为空");
-        }
-        // 构造 API 参数
-        Object[] parameters = new Object[]{data};
-        // 调用接口
-        String response = execute(WebApiService.EXECUTE_BILL_QUERY.getServiceName(), parameters);
-        // 返回值校验
-        if (response == null || response.isBlank()) {
-            return Collections.emptyList();
-        }
-        try {
-            // 解析为二维数组 List<List<Object>>
-            return webApiResponseConverter.parseListListObjectApiResponse(response);
-        } catch (Exception e) {
-            throw new RuntimeException("解析 ExecuteBillQuery 返回结果失败，原始响应：" + response, e);
         }
     }
 
