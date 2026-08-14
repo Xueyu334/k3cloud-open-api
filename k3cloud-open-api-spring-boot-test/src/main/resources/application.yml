@@ -8,6 +8,12 @@ spring:
   banner:
     charset: utf-8
     location: classpath:banner.txt
+
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    root: info
+
 kingdee:
   k3cloud:
     web-api:
@@ -24,8 +30,4 @@ kingdee:
       proxy: ""
       print-execute-url: false
 
-logging:
-  level:
-    root: info
-    com.rain: debug
-    com.kingdee: info
+
