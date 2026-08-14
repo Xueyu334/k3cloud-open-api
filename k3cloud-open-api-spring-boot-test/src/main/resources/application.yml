@@ -10,7 +10,6 @@ spring:
     location: classpath:banner.txt
 
 logging:
-  config: classpath:logback-spring.xml
   level:
     root: info
 
@@ -29,5 +28,4 @@ kingdee:
       stock-timeout: 180
       proxy: ""
       print-execute-url: false
-
 
