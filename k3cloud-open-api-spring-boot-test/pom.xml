@@ -1,0 +1,66 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.xy</groupId>
+        <artifactId>k3cloud-open-api</artifactId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>k3cloud-open-api-spring-boot-test</artifactId>
+    <packaging>jar</packaging>
+
+    <name>k3cloud-open-api-spring-boot-test</name>
+    <description>K3 Cloud Open API Spring Boot Starter 联调项目</description>
+
+    <dependencies>
+        <!-- 提供 Spring Boot 核心启动、自动配置、日志及 YAML 支持。 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- 以业务项目的方式接入待验证的 Starter。 -->
+        <dependency>
+            <groupId>com.xy</groupId>
+            <artifactId>k3cloud-open-api-spring-boot-starter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Starter 不传递金蝶 SDK，使用方需要显式声明。 -->
+        <dependency>
+            <groupId>com.kingdee</groupId>
+            <artifactId>k3cloud-webapi-sdk-jdk11</artifactId>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- 生成可以直接启动的联调应用 JAR。 -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.rain.K3CloudOpenApiStarterTestApplication</mainClass>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

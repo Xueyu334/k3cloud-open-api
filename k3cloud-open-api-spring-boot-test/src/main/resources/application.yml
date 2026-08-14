@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: k3cloud-open-api-spring-boot-test
+  profiles:
+    active: local
+  main:
+    banner-mode: log
+  banner:
+    charset: utf-8
+    location: classpath:banner.txt
+kingdee:
+  k3cloud:
+    web-api:
+      server-url: http://localhost/
+      acct-id: test-acct
+      user-name: test-user
+      app-id: test-app
+      app-sec: test-secret
+      lc-id: 2052
+      org-num: ""
+      connect-timeout: 120
+      request-timeout: 120
+      stock-timeout: 180
+      proxy: ""
+      print-execute-url: false
+
+logging:
+  level:
+    root: info
+    com.rain: debug
+    com.kingdee: info

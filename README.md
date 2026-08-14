@@ -9,6 +9,7 @@
 | `k3cloud-open-api-domain`              | 保存、查询、提交、审核等接口的请求与响应模型                             |
 | `k3cloud-open-api-common`              | WebAPI 调用工具、会话/签名 HTTP 客户端、异常及多种响应转换器             |
 | `k3cloud-open-api-spring-boot-starter` | 配置属性绑定及 Spring Boot 自动配置                                      |
+| `k3cloud-open-api-spring-boot-test`    | Starter 的可启动联调项目、上下文测试及真实接口测试                       |
 
 ## 兼容基线
 
@@ -30,6 +31,33 @@ mvn clean install
 ```
 
 该命令会构建全部模块，并将当前版本安装到本地 Maven 仓库。本文示例使用版本 `3.0.0`。
+
+### Starter 联调模块
+
+执行 Starter 上下文测试及真实接口测试：
+
+```shell
+mvn -pl k3cloud-open-api-spring-boot-test -am test
+```
+
+启动联调应用前，在测试模块的 `application.yml` 中直接填写目标环境的连接及认证信息；配置项与下文 Spring Boot 快速开始保持一致。
+配置文件默认使用 `http://localhost/` 和测试占位凭据，因此未修改时只会验证应用和 Bean 能否正常启动，不会主动调用接口。
+
+```shell
+mvn -pl k3cloud-open-api-spring-boot-test -am package -DskipTests
+java -jar k3cloud-open-api-spring-boot-test/target/k3cloud-open-api-spring-boot-test-3.0.0.jar
+```
+
+`K3CloudWebApiLiveTest` 会随 Maven 测试默认执行，使用 `application.yml` 中的配置验证 SDK、Session 和 Signed 三条只读查询路径。
+执行前必须把测试占位配置替换为可用的金蝶环境配置：
+
+```powershell
+mvn -pl k3cloud-open-api-spring-boot-test -am test `
+  -Dtest=K3CloudWebApiLiveTest `
+  -Dsurefire.failIfNoSpecifiedTests=false
+```
+
+不要将上述真实配置写入或提交到仓库。
 
 ## Spring Boot 快速开始
 
