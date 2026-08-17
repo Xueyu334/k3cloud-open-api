@@ -36,12 +36,6 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!-- Starter 不传递金蝶 SDK，使用方需要显式声明。 -->
-        <dependency>
-            <groupId>com.kingdee</groupId>
-            <artifactId>k3cloud-webapi-sdk-jdk11</artifactId>
-        </dependency>
-
     </dependencies>
 
     <build>
