@@ -126,18 +126,23 @@
 
     <build>
         <plugins>
-            <!-- 解析 ${revision} 并安装、发布可被外部项目消费的 POM。 -->
+            <!-- 生成不依赖父工程的消费端 POM，并解析继承配置与依赖版本。 -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
                 <version>1.7.3</version>
                 <configuration>
-                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                    <!-- 移除父工程、构建配置等仅用于本项目构建的内容，并将继承的坐标和依赖版本解析为固定值。 -->
+                    <flattenMode>defaults</flattenMode>
+                    <!-- 将当前 MavenProject 使用的 POM 切换为扁平化 POM，确保 install/deploy 发布的是消费端 POM。 -->
                     <updatePomFile>true</updatePomFile>
+                    <!-- 生成文件统一放入 target，避免在项目根目录产生临时 POM。 -->
                     <outputDirectory>${project.build.directory}</outputDirectory>
+                    <!-- 明确扁平化 POM 文件名，便于检查实际安装、发布的 POM 内容。 -->
                     <flattenedPomFilename>flattened-pom.xml</flattenedPomFilename>
                 </configuration>
                 <executions>
+                    <!-- 在资源处理阶段生成扁平化 POM，保证后续 package、install 和 deploy 使用该文件。 -->
                     <execution>
                         <id>flatten</id>
                         <phase>process-resources</phase>
@@ -145,6 +150,7 @@
                             <goal>flatten</goal>
                         </goals>
                     </execution>
+                    <!-- 执行 mvn clean 时同步删除插件生成的扁平化 POM。 -->
                     <execution>
                         <id>flatten-clean</id>
                         <goals>
@@ -152,6 +158,17 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <!-- 父工程仅用于聚合构建，不作为制品发布；该配置不继承到子模块。 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.1.4</version>
+                <inherited>false</inherited>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
             </plugin>
         </plugins>
 
@@ -216,6 +233,14 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <distributionManagement>
+        <!-- 发布主 JAR、源码 JAR 和 POM 到阿里云私有 Maven 仓库。 -->
+        <repository>
+            <id>2488063-release-YmmVR6</id>
+            <url>https://packages.aliyun.com/66c2c0df684fca2ef650a01a/maven/2488063-release-ymmvr6</url>
+        </repository>
+    </distributionManagement>
 
 
     <repositories>

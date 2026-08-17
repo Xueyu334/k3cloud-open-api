@@ -16,6 +16,11 @@
     <name>k3cloud-open-api-spring-boot-test</name>
     <description>K3 Cloud Open API Spring Boot Starter 联调项目</description>
 
+    <properties>
+        <!-- 联调应用仅用于本地验证，不发布到私有 Maven 仓库。 -->
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
     <dependencies>
         <!-- 提供 Spring Boot 核心启动、自动配置、日志及 YAML 支持。 -->
         <dependency>
