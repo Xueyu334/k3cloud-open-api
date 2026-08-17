@@ -40,8 +40,8 @@ mvn clean install
 - `k3cloud-open-api-common`
 - `k3cloud-open-api-spring-boot-starter`
 
-每个模块都会发布 POM、主 JAR 和 `-sources.jar` 源码包。父工程 `k3cloud-open-api` 仅参与聚合构建，
-`k3cloud-open-api-spring-boot-test` 仅用于联调，两者均配置为跳过发布。
+每个模块都会发布 POM、主 JAR 和 `-sources.jar` 源码包。父工程 `k3cloud-open-api` 参与模块聚合并提供统一构建配置，
+但自身不发布；`k3cloud-open-api-spring-boot-test` 仅用于联调，同样配置为跳过发布。
 
 #### 1. 配置发布仓库
 
@@ -62,6 +62,7 @@ mvn clean install
 
 #### 2. 配置本机凭据
 
+从阿里云云效 Packages 对应 Maven 仓库的“仓库指南”中获取用户名和密码，并确认账号具有目标仓库的读取及部署权限。
 在 Maven 用户配置文件中添加与 `distributionManagement.repository.id` 完全相同的 `server`。Windows 默认路径为
 `C:\Users\<用户名>\.m2\settings.xml`，Linux 和 macOS 默认路径为 `~/.m2/settings.xml`：
 
@@ -73,13 +74,14 @@ mvn clean install
         <server>
             <id>2488063-release-YmmVR6</id>
             <username>替换为私库用户名</username>
-            <password>替换为私库密码或访问令牌</password>
+            <password>替换为私库密码</password>
         </server>
     </servers>
 </settings>
 ```
 
-`settings.xml` 属于开发机或 CI 环境的私有配置，不要将真实用户名、密码或访问令牌提交到仓库。
+已有 `settings.xml` 时，只需将示例中的 `<server>` 合并到原有 `<servers>`，不要使用整段示例覆盖原文件。
+`settings.xml` 属于开发机或 CI 环境的私有配置，不要将真实用户名或密码提交到仓库。
 
 #### 3. 修改发布版本
 
@@ -104,7 +106,7 @@ mvn clean deploy -pl k3cloud-open-api-domain,k3cloud-open-api-common,k3cloud-ope
 - `-pl` 只选择三个需要发布的模块。
 - `-am` 同时构建这些模块在当前 reactor 中依赖的项目。
 - `deploy` 执行编译、打包、本地安装和私库上传。
-- `-DskipTests` 跳过测试执行；正式发布前需要执行测试时可移除此参数。
+- `-DskipTests` 跳过测试执行；移除此参数只会执行本次选中模块的测试，联调模块测试需按下一节单独执行。
 
 发布成功后，日志中父工程会显示 `Skipping artifact deployment`，三个目标模块会显示 POM、主 JAR 和源码 JAR 的
 `Uploaded` 记录，并以 `BUILD SUCCESS` 结束。
