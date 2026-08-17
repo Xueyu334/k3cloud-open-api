@@ -32,6 +32,83 @@ mvn clean install
 
 该命令会构建全部模块，并将当前版本安装到本地 Maven 仓库。本文示例使用版本 `3.0.0`。
 
+### 发布到私有 Maven 仓库
+
+发布范围包括以下三个可复用模块：
+
+- `k3cloud-open-api-domain`
+- `k3cloud-open-api-common`
+- `k3cloud-open-api-spring-boot-starter`
+
+每个模块都会发布 POM、主 JAR 和 `-sources.jar` 源码包。父工程 `k3cloud-open-api` 仅参与聚合构建，
+`k3cloud-open-api-spring-boot-test` 仅用于联调，两者均配置为跳过发布。
+
+#### 1. 配置发布仓库
+
+父 `pom.xml` 通过 `distributionManagement` 指定发布目标，仓库 `id` 同时用于匹配 Maven 本机凭据：
+
+```xml
+<distributionManagement>
+    <repository>
+        <id>2488063-release-YmmVR6</id>
+        <url>https://packages.aliyun.com/66c2c0df684fca2ef650a01a/maven/2488063-release-ymmvr6</url>
+    </repository>
+</distributionManagement>
+```
+
+项目通过 `maven-source-plugin` 附加源码 JAR；通过 `flatten-maven-plugin` 生成不依赖父工程的消费端 POM，
+并将继承配置及依赖版本解析为固定值。父工程的 `maven-deploy-plugin` 使用 `skip=true` 且不向子模块继承，
+因此父工程仍可参与 reactor 构建，但不会上传到私库。
+
+#### 2. 配置本机凭据
+
+在 Maven 用户配置文件中添加与 `distributionManagement.repository.id` 完全相同的 `server`。Windows 默认路径为
+`C:\Users\<用户名>\.m2\settings.xml`，Linux 和 macOS 默认路径为 `~/.m2/settings.xml`：
+
+```xml
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+    <servers>
+        <server>
+            <id>2488063-release-YmmVR6</id>
+            <username>替换为私库用户名</username>
+            <password>替换为私库密码或访问令牌</password>
+        </server>
+    </servers>
+</settings>
+```
+
+`settings.xml` 属于开发机或 CI 环境的私有配置，不要将真实用户名、密码或访问令牌提交到仓库。
+
+#### 3. 修改发布版本
+
+发布前修改父 `pom.xml` 中的 `revision`。正式版本应使用未发布过的新版本号，避免覆盖已有制品：
+
+```xml
+<properties>
+    <revision>3.0.0</revision>
+</properties>
+```
+
+三个子模块继承该版本，模块间依赖也会由扁平化 POM 解析为相同的固定版本。
+
+#### 4. 执行发布
+
+在项目根目录执行：
+
+```shell
+mvn clean deploy -pl k3cloud-open-api-domain,k3cloud-open-api-common,k3cloud-open-api-spring-boot-starter -am -DskipTests
+```
+
+- `-pl` 只选择三个需要发布的模块。
+- `-am` 同时构建这些模块在当前 reactor 中依赖的项目。
+- `deploy` 执行编译、打包、本地安装和私库上传。
+- `-DskipTests` 跳过测试执行；正式发布前需要执行测试时可移除此参数。
+
+发布成功后，日志中父工程会显示 `Skipping artifact deployment`，三个目标模块会显示 POM、主 JAR 和源码 JAR 的
+`Uploaded` 记录，并以 `BUILD SUCCESS` 结束。
+
 ### Starter 联调模块
 
 执行 Starter 上下文测试及真实接口测试：
